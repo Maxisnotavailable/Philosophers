@@ -1,0 +1,98 @@
+0 2 has taken a fork
+0 2 has taken a fork R
+0 2 is eating
+0 4 has taken a fork
+0 4 has taken a fork R
+0 4 is eating
+201 2 is sleeping
+201 philo 5    i = 5
+201 4 is sleeping
+201 3 has taken a fork R
+201 3 has taken a fork
+201 3 is eating
+201 1 has taken a fork R
+201 1 has taken a fork
+201 1 is eating
+403 4 is thinking
+403 philo 4    i = 4
+403 3 is sleeping
+403 2 is thinking
+403 5 has taken a fork R
+403 1 is sleeping
+403 5 has taken a fork
+403 5 is eating
+403 2 has taken a fork
+403 2 has taken a fork R
+403 2 is eating
+605 2 is sleeping
+606 4 has taken a fork
+606 3 is thinking
+606 1 is thinking
+606 1 has taken a fork R
+606 5 is sleeping
+606 1 has taken a fork
+606 1 is eating
+606 4 has taken a fork R
+606 4 is eating
+807 2 is thinking
+808 4 is sleeping
+808 3 has taken a fork R
+808 3 has taken a fork
+808 3 is eating
+808 5 is thinking
+808 1 is sleeping
+808 5 has taken a fork R
+808 5 has taken a fork
+808 5 is eating
+808 2 has taken a fork
+1009 3 is sleeping
+1009 2 has taken a fork R
+1009 2 is eating
+1009 4 is thinking
+1009 4 has taken a fork
+1010 5 is sleeping
+1010 4 has taken a fork R
+1010 4 is eating
+1011 1 is thinking
+1212 3 is thinking
+1212 philo 3    i = 3
+1212 2 is sleeping
+1212 1 has taken a fork R
+1212 1 has taken a fork
+1212 1 is eating
+1212 4 is sleeping
+1212 5 is thinking
+1414 3 has taken a fork R
+1414 3 has taken a fork
+1414 3 is eating
+1414 2 is thinking
+1414 philo 2    i = 2
+1414 5 has taken a fork R
+1414 1 is sleeping
+1414 5 has taken a fork
+1414 5 is eating
+1414 4 is thinking
+1616 2 has taken a fork
+1616 3 is sleeping
+1616 5 is sleeping
+1616 2 has taken a fork R
+1616 2 is eating
+1616 4 has taken a fork
+1616 4 has taken a fork R
+1616 4 is eating
+1616 1 is thinking
+1818 5 is thinking
+1818 5 has taken a fork R
+1818 2 is sleeping
+1818 1 has taken a fork R
+1818 3 is thinking
+1818 3 has taken a fork R
+1818 3 has taken a fork
+1818 3 is eating
+1818 4 is sleeping
+1818 5 has taken a fork
+1818 5 is eating
+2020 2 is thinking
+2020 5 is sleeping
+2020 1 has taken a fork
+2020 1 died
