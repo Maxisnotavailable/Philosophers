@@ -31,6 +31,7 @@ typedef struct s_args {
 
 typedef struct s_philo {
 	int        		name;
+	int				pos;
 	int		 		elapsed_start;
 	int				elapsed_eat;
 	int				eat_nb;

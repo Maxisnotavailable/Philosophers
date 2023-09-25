@@ -54,6 +54,8 @@ int	parsing(int argc, char **argv, t_args *args)
 	args->sleep_time = ft_atoi(argv[4], 0);
 	if (argc == 6)
 		args->meat_nb = ft_atoi(argv[5], 1);
+	if (args->philo_nb == 1)
+		return (printf("0 1 died\n"), 1); ///// CREER THREAD ET MUTEX
 	return (0);
 }
 
@@ -86,7 +88,8 @@ int	die_test(t_philo *philo_received)
 	if (philo_received->elapsed_eat > philo_received->args.die_time)
 	{
 		printf("%d %d died\n", philo_received->elapsed_start, philo_received->name);
-		return (1);
+		exit (1);
+		//return (1);
 	}
 	return (0);
 }
@@ -94,33 +97,21 @@ int	die_test(t_philo *philo_received)
 int	get_fork(t_philo *philo_received)
 {
 	if (philo_received->name % 2 == 0)
-	{
 		pthread_mutex_lock(&philo_received->fork);
-		printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
-	}
 	else
-	{
 		pthread_mutex_lock(philo_received->fork_r);
-		printf("%d %d has taken a fork R\n", elapsed(philo_received, 0), philo_received->name);
-	}
 	if (die_test(philo_received) == 1)
 		exit (1);
 		//return (1);
-	//printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
+	printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
 	if (philo_received->name % 2 == 0)
-	{
 		pthread_mutex_lock(philo_received->fork_r);
-		printf("%d %d has taken a fork R\n", elapsed(philo_received, 0), philo_received->name);
-	}
 	else
-	{
 		pthread_mutex_lock(&philo_received->fork);
-		printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
-	}
 	if (die_test(philo_received) == 1)
 		exit (1);
 		//return (1);
-	//printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
+	printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
 	return (0);
 }
 
@@ -150,27 +141,81 @@ int	my_usleep(t_philo *philo_received, int i)
 	return (0);
 }
 
+int	wait_test_begin(t_philo *philo_received)
+{
+	//printf(" wait philo %d   %d > %d * %d\n",philo_received->name, elapsed(philo_received, 0), philo_received->args.eat_time, philo_received->pos);
+	if (elapsed(philo_received, 0) > philo_received->args.eat_time * philo_received->pos)
+	{
+		printf("%d philo %d    wait BEGIN\n",philo_received->elapsed_start, philo_received->name);
+		my_usleep(philo_received, 0);
+		return (1);
+	}
+	return (0);
+}
+
+int	wait_test(t_philo *philo_received, int wait)
+{
+	//printf("%d > %d * %d + %d * %d * %d\n", elapsed(philo_received, 0), philo_received->args.eat_time, philo_received->pos, philo_received->args.eat_time, philo_received->args.philo_nb, wait);
+	if (elapsed(philo_received, 0) > ((philo_received->args.eat_time * philo_received->pos) + (philo_received->args.eat_time * philo_received->args.philo_nb * wait)))
+	{
+		printf("%d philo %d    wait ROUTINE\n",philo_received->elapsed_start, philo_received->name);
+		my_usleep(philo_received, 0);
+		wait++;
+		return (wait);
+	}
+	return (wait);
+}
+
+int	even_routine(t_philo *philo_received)
+{
+	if (die_test(philo_received) == 1)
+		return (1);
+	if (get_fork(philo_received) == 1)
+		return (1);
+	if (philo_received->eat_nb == 0)
+	{
+		philo_received->elapsed_start = elapsed(philo_received, 0);
+		if (philo_received->elapsed_start > philo_received->args.die_time)
+		{
+			printf("%d %d died\n", philo_received->elapsed_start, philo_received->name);
+			return (1);
+		}
+	}
+	printf("%d %d is eating\n", elapsed(philo_received, 0), philo_received->name);
+	gettimeofday(&philo_received->start_eat_time, NULL);
+	if (my_usleep(philo_received, 0) == 1)
+		return (1);
+	philo_received->eat_nb++;
+	pthread_mutex_unlock(&philo_received->fork);
+	pthread_mutex_unlock(philo_received->fork_r);
+	if (philo_received->args.meat_nb != 0 && philo_received->eat_nb >= philo_received->args.meat_nb)
+		exit(1);
+	printf("%d %d is sleeping\n", elapsed(philo_received, 0), philo_received->name);
+	if (my_usleep(philo_received, 1) == 1)
+		return (1);
+	printf("%d %d is thinking\n", elapsed(philo_received, 0), philo_received->name);
+	return (0);
+}
+
 void	routine(void *arg)
 {
 	t_philo	*philo_received;
-	int		i;
-	int		time;
+	int		wait_begin;
+	int		wait;
 
 	(void)(philo_received);
 	philo_received = (t_philo *)arg;
-	i = philo_received->args.philo_nb;
-	time = 0;
+	wait_begin = 0;
+	wait = 1;
 	if (philo_received->name % 2 != 0 && my_usleep(philo_received, 0) == 1)
 		return ;
-		//usleep(1000);
-	/*if (philo_received->name == i && philo_received->args.philo_nb % 2 != 0)
-		my_usleep(philo_received, 0);*/
-		//usleep(philo_received->args.eat_time * 1000);
 	while (1)
 	{
 		if (philo_received->args.philo_nb % 2 == 0)
 		{
-			if (die_test(philo_received) == 1)
+			if (even_routine(philo_received) == 1)
+				return ;
+			/*if (die_test(philo_received) == 1)
 				return ;
 			if (get_fork(philo_received) == 1)
 				return ;
@@ -179,13 +224,12 @@ void	routine(void *arg)
 				philo_received->elapsed_start = elapsed(philo_received, 0);
 				if (philo_received->elapsed_start > philo_received->args.die_time)
 				{
-					printf("%d %d START died\n", philo_received->elapsed_start, philo_received->name);
+					printf("%d %d died\n", philo_received->elapsed_start, philo_received->name);
 					return ;
 				}
 			}
 			printf("%d %d is eating\n", elapsed(philo_received, 0), philo_received->name);
 			gettimeofday(&philo_received->start_eat_time, NULL);
-			//usleep(philo_received->args.eat_time * 1000);
 			if (my_usleep(philo_received, 0) == 1)
 				return ;
 			philo_received->eat_nb++;
@@ -194,72 +238,61 @@ void	routine(void *arg)
 			if (philo_received->args.meat_nb != 0 && philo_received->eat_nb >= philo_received->args.meat_nb)
 				exit(1);
 			printf("%d %d is sleeping\n", elapsed(philo_received, 0), philo_received->name);
-			//usleep(philo_received->args.sleep_time * 1000);
 			if (my_usleep(philo_received, 1) == 1)
 				return ;
-			printf("%d %d is thinking\n", elapsed(philo_received, 0), philo_received->name);
+			printf("%d %d is thinking\n", elapsed(philo_received, 0), philo_received->name);*/
 		}
 		else
 		{
 			if (die_test(philo_received) == 1)
 				return ;
-			if (elapsed(philo_received, 0) >= time && philo_received->name == i )
+
+
+			if (philo_received->args.eat_time >= philo_received->args.sleep_time)
 			{
-				printf("%d philo %d    i = %d\n",philo_received->elapsed_start, philo_received->name, i);
-				my_usleep(philo_received, 0);
-				//usleep(philo_received->args.eat_time * 1000);
-				//i--;
-				if (i == 0)
-					i = philo_received->args.philo_nb;
+				//printf("philo %d wait test 1\n", philo_received->name);
+				if (wait_begin == 0)
+					wait_begin = wait_test_begin(philo_received);
+				else
+					wait = wait_test(philo_received, wait);
 			}
-			/*if (philo_received->name == i)
+			else if (philo_received->args.eat_time < philo_received->args.sleep_time && philo_received->name == philo_received->args.philo_nb && wait_begin == 0)
 			{
-				printf("%d philo %d    i = %d\n",philo_received->elapsed_start, philo_received->name, i);
+				printf("eat < sleep %d philo %d    wait BEGIN\n",philo_received->elapsed_start, philo_received->name);
 				my_usleep(philo_received, 0);
-				//usleep(philo_received->args.eat_time * 1000);
-				//i--;
-				if (i == 0)
-					i = philo_received->args.philo_nb;
-			}*/
+				wait_begin++;
+			}
+
 
 			if (get_fork(philo_received) == 1)
 				return ;
-			/*pthread_mutex_lock(&philo_received->fork);
-			printf("%d %d has taken a fork\n", elapsed(philo_received, 0), philo_received->name);
-			if (die_test(philo_received) == 1)
-				return ;
-			pthread_mutex_lock(philo_received->fork_r);
-			printf("%d %d has taken a fork R\n", elapsed(philo_received, 0), philo_received->name);
-			if (die_test(philo_received) == 1)
-				return ;*/
-
 			if (philo_received->eat_nb == 0)
 			{
 				philo_received->elapsed_start = elapsed(philo_received, 0);
 				if (philo_received->elapsed_start > philo_received->args.die_time)
 				{
-					printf("%d %d START died\n", philo_received->elapsed_start, philo_received->name);
+					printf("%d %d died\n", philo_received->elapsed_start, philo_received->name);
 					return ;
 				}
 			}
-
 			printf("%d %d is eating\n", elapsed(philo_received, 0), philo_received->name);
 			gettimeofday(&philo_received->start_eat_time, NULL);
-			//usleep(philo_received->args.eat_time * 1000);
 			if (my_usleep(philo_received, 0) == 1)
 				return ;
 			philo_received->eat_nb++;
-			i--;
-			
 			pthread_mutex_unlock(&philo_received->fork);
 			pthread_mutex_unlock(philo_received->fork_r);
-
-
-
 			if (philo_received->args.meat_nb != 0 && philo_received->eat_nb >= philo_received->args.meat_nb)
 				exit(1);
+			if (philo_received->args.eat_time >= philo_received->args.sleep_time)/////
+			{
+				//printf("philo %d wait test 2\n", philo_received->name);
+				if (wait_begin == 0)
+					wait_begin = wait_test_begin(philo_received);
+				else
+					wait = wait_test(philo_received, wait);
+			}
 			printf("%d %d is sleeping\n", elapsed(philo_received, 0), philo_received->name);
-			//usleep(philo_received->args.sleep_time * 1000);
 			if (my_usleep(philo_received, 1) == 1)
 				return ;
 			printf("%d %d is thinking\n", elapsed(philo_received, 0), philo_received->name);
@@ -282,11 +315,6 @@ int	main (int argc, char **argv)
 
 	if (parsing(argc, argv, &args) == 1)
 		return (1);
-	if (args.philo_nb == 1)
-	{
-		printf("0 1 died\n");
-		exit(1);
-	}
 	philo = malloc(sizeof(t_philo) * args.philo_nb);
 	i = -1;
 	gettimeofday(&args.start_time, NULL);
@@ -301,15 +329,13 @@ int	main (int argc, char **argv)
 	while (++i < args.philo_nb)
 	{
 		philo[i].name = i + 1;
+		philo[i].pos = args.philo_nb - i;
 		philo[i].eat_nb = 0;
 		philo[i].args = args;
 		ret = pthread_create(&(philo[i].th), NULL, (void *)routine, &philo[i]);
 		if (ret != 0)
 			return (1);
 	}
-	
-
-
 	i = -1;
 	while (++i < args.philo_nb) 
 		pthread_join(philo[i].th, NULL);
