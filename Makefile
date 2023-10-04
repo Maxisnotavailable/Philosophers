@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 CC			= gcc
-CFLAGS		= -Wall -Wextra -Werror #-pthread -fsanitize=thread -g3
+CFLAGS		= -Wall -Wextra -Werror -lpthread -fsanitize=thread -g3
 SRCS		= philo.c
 SRCSBONUS	= 
 OBJS		= ${SRCS:.c=.o}
